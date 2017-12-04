@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 from datetime import datetime
 
@@ -23,25 +24,26 @@ def begin_crawl():
             if not line or line.startswith("#"):
                 continue  # skip blank and commented out lines
 
-            page, html = make_request(line)
+            #page, html = make_request(line)
             count = 0
 
             # look for subcategory links on this page
-            subcategories = page.findAll("div", "bxc-grid__image")  # downward arrow graphics
-            subcategories.extend(page.findAll("li", "sub-categories__list__item"))  # carousel hover menu
-            sidebar = page.find("div", "browseBox")
-            if sidebar:
-                subcategories.extend(sidebar.findAll("li"))  # left sidebar
+            #subcategories = page.findAll("div", "bxc-grid__image")  # downward arrow graphics
+            #subcategories = page.findAll("li", "acs-ln-special-link") # Only "Shop all" links
+            #sidebar = page.find("div", "browseBox")
+            #if sidebar:
+            #    subcategories.extend(sidebar.findAll("li"))  # left sidebar
+            enqueue_url(line)
+            #for subcategory in subcategories:
+            #    link = subcategory.find("a")
+            #    if not link:
+            #        continue
+            #    link = link["href"]
+            #    count += 1
+            #    enqueue_url(link)
+            #    print("Enqueued {}".format(link))
 
-            for subcategory in subcategories:
-                link = subcategory.find("a")
-                if not link:
-                    continue
-                link = link["href"]
-                count += 1
-                enqueue_url(link)
-
-            log("Found {} subcategories on {}".format(count, line))
+            #log("Found {} subcategories on {}".format(count, line))
 
 
 def fetch_listing():
