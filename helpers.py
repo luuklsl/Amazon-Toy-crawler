@@ -21,7 +21,7 @@ redis = redis.StrictRedis(host=settings.redis_host, port=settings.redis_port, db
 def make_request(url, return_soup=True):
     # global request building and response handling
 
-    url = format_url(url)
+    # url = format_url(url)
 
     if "picassoRedirect" in url:
         return None  # skip the redirect URLs
@@ -30,9 +30,9 @@ def make_request(url, return_soup=True):
     if num_requests >= settings.max_requests:
         raise Exception("Reached the max number of requests: {}".format(settings.max_requests))
 
-    proxies = get_proxy()
+    # proxies = get_proxy()
     try:
-        r = requests.get(url, headers=settings.headers, proxies=proxies)
+        r = requests.get(url, headers=settings.headers)
     except RequestException as e:
         log("WARNING: Request for {} failed, trying again.".format(url))
         return make_request(url)  # try request again, recursively
@@ -97,6 +97,11 @@ def get_proxy():
         "https": proxy_url
     }
 
+def enq_redis(stack_name, entry):
+    return redis.sadd(stack_name, entry)
+
+def deq_redis(stack_name):
+    return redis.spop(stack_name)
 
 def enqueue_url(u):
     url = format_url(u)
@@ -105,6 +110,12 @@ def enqueue_url(u):
 
 def dequeue_url():
     return redis.spop("listing_url_queue")
+
+
+def page_save(html):
+    f = open("thing.html", 'w')
+    f.write(html.encode('utf-8'))
+    f.close()
 
 
 if __name__ == '__main__':

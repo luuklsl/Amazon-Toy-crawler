@@ -29,6 +29,10 @@ class ProductRecord(object):
         conn.commit()
         return cur.fetchone()[0]
 
+def retrieve():
+    cur.execute("SELECT * FROM products WHERE title LIKE 'LEGO Ninjago Movie Garmadon%' ")
+    return cur.fetchall()
+
 
 if __name__ == '__main__':
 
@@ -39,8 +43,21 @@ if __name__ == '__main__':
         title       varchar(2056),
         product_url         varchar(2056),
         listing_url varchar(2056),
-        price       varchar(128),
+        price       money,
         primary_img varchar(2056),
-        crawl_time timestamp
+        crawl_time timestamp,
+        bulletpoint_description text,
+        manfacturer_info text,
+        product_info text,
+        s_dimensions varchar(2056),
+        s_weight varchar(2056),
+        s_ASIN varchar (2056),
+        s_MRA_min varchar(2056),
+        s_MRA_max varchar(2056),
+        s_batteries varchar(2056),
+        s_manufacturer varchar(2056),
+        s_department varchar(2056)
+
+
     );""")
     conn.commit()

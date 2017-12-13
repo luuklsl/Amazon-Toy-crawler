@@ -4,12 +4,12 @@ current_dir = os.path.dirname(os.path.realpath(__file__))
 
 # Database
 database = "amazon_crawler"
-host = "localhost"
-user = "root"
-password = "lcdroot2"
+host = ""
+user = "ARPIR"
+password = " "
 
 # Redis
-redis_host = "localhost"
+redis_host = ""
 redis_port = 6379
 redis_db = 0
 
@@ -34,11 +34,11 @@ proxy_port = ""
 
 # Crawling Logic
 start_file = os.path.join(current_dir, "start-urls.txt")
-max_requests = 1 * 10**4  # 10.000
+max_requests = 5 #1 * 10**4  # 10.000
 max_details_per_listing = 9999
 
 # Threads
-max_threads = 200
+max_threads = 1
 
 # Logging & Storage
 log_stdout = True
