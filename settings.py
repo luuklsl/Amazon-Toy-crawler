@@ -34,11 +34,12 @@ proxy_port = ""
 
 # Crawling Logic
 start_file = os.path.join(current_dir, "start-urls.txt")
-max_requests = 5 #1 * 10**4  # 10.000
+max_requests = 10000 #1 * 10**4  # 10.000
 max_details_per_listing = 9999
+max_per_set = 500
 
 # Threads
-max_threads = 1
+max_threads = 2
 
 # Logging & Storage
 log_stdout = True

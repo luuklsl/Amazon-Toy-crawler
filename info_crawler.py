@@ -5,7 +5,7 @@ from datetime import datetime
 import eventlet
 
 import settings
-from models import ProductRecord, retrieve
+from models import ProductRecord, retrieve, insert_extra
 from helpers import make_request, log, format_url, enqueue_url, dequeue_url, enq_redis, deq_redis, page_save
 from extractors import * # get_title, get_url, get_price, get_primary_img, price_on_page, get_category, get_bullets, get_product_description, manu_info
 
@@ -25,7 +25,7 @@ def begin_crawl():
     count = 0
     database_get = retrieve()
     print len (database_get)
-    print database_get
+    # print database_get
     for entry in database_get:
         enq_redis("products", (entry[0],entry[2]))
         # enq_redis("products", entry[])
@@ -67,85 +67,44 @@ def fetch_info():
 
     global crawl_time
     redis_entry = deq_redis('products')
+    if not redis_entry:
+        return
     x = redis_entry.strip("()'")
     redis_list = x.split(", '")
-    # for y in range(len(redis_list)):
-    #     # redis_list[y] = 3
-    #     print y
-    #     redis_list[y].strip("'")
     x= int(redis_list[0])
     url = redis_list[1]
-    # print x
-    # # print redis_list
-    # return
+    
     if url is None:
         log("WARNING, no product found, is there still any queued?")
         return
     
 
     page, html = make_request(url)
-    if not page: #if we dont find the page, we can't do anything with it
+    if page is None: #if we dont find the page, we can't do anything with it
+        print "Page does not exists?"
         return
+
 
     if save_html:
         print ("saving")
         page_save(html)
 
-    # f = open("thing.html", 'r')
-    # html = f.read()
-    # f.close()
-
-    # print page
-
-
+    print url
     product_price = price_on_page(page)
     category = get_category(page.find("ul", "a-unordered-list a-horizontal a-size-small"))
     bullets = get_bullets(page.find("ul", "a-unordered-list a-vertical a-spacing-none"))
     manufacturer_inf = manu_info(page)
     # print ("found as manu_inf: {}".format(manufacturer_inf))
     product_description = get_product_description(page.find("div", "a-row feature"))
-    specs = get_specs(page.find("table", "a-keyvalue prodDetTable"))
-    
-    # specs = TODO: expand upon this
-        #possibly use a switch to expand upon this?
-        # table
+    specs = get_specs(page.find("table", "a-keyvalue prodDetTable")) #returns a dict with set keys
+    # print (type(product_price), type(category), type(bullets), type(manufacturer_inf), type(product_description))
+    # print (product_price, category, bullets, manufacturer_inf, product_description)
+    # for keys in specs:
+        # print type(specs[keys])
+    # product_price = product_price.replace(".",",")
+    insert_extra(product_price, category, bullets, manufacturer_inf, product_description, specs, int(x))
+    pile.spawn(fetch_info)
 
-
-    # print product_description
-
-
-
-
-    # for item in items[:settings.max_details_per_listing]:
-
-    #     product_image = get_primary_img(item)
-    #     if not product_image:
-    #         log("No product image detected, skipping")
-    #         continue
-
-    #     product_title = get_title(item)
-    #     product_url = get_url(item)
-    #     product_price = get_price(item)
-
-    #     product = ProductRecord(
-    #         title=product_title,
-    #         product_url=format_url(product_url),
-    #         listing_url=format_url(url),
-    #         price=product_price,
-    #         primary_img=product_image,
-    #         crawl_time=crawl_time
-
-    #     )
-    #     product_id = product.save()
-    #     # download_image(product_image, product_id)
-
-    # # add next page to queue
-    # next_link = page.find("a", id="pagnNextLink")
-    # if next_link:
-    #     log(" Found 'Next' link on {}: {}".format(url, next_link["href"]))
-    #     enqueue_url(next_link["href"])
-    #     pile.spawn(fetch_listing)
-    # retrieve()
 
 
 if __name__ == '__main__':
@@ -155,6 +114,6 @@ if __name__ == '__main__':
         begin_crawl()  # put a bunch of subcategory URLs into the queue
 
     log("Beginning crawl at {}".format(crawl_time))
-    # [pile.spawn(fetch_listing) for _ in range(settings.max_threads)]
-    # pool.waitall()
-    fetch_info()
+    [pile.spawn(fetch_info) for _ in range(settings.max_threads)]
+    pool.waitall()
+    # fetch_info()
