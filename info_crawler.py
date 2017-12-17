@@ -6,7 +6,7 @@ import eventlet
 
 import settings
 from models import ProductRecord, retrieve, insert_extra
-from helpers import make_request, log, format_url, enqueue_url, dequeue_url, enq_redis, deq_redis, page_save
+from helpers import make_request, log, format_url, enqueue_url, dequeue_url, enq_redis, deq_redis, page_save, smem
 from extractors import * # get_title, get_url, get_price, get_primary_img, price_on_page, get_category, get_bullets, get_product_description, manu_info
 
 crawl_time = datetime.now()
@@ -34,33 +34,6 @@ def begin_crawl():
     log("Enqueued a total of {} products".format(count))
 
 
-    # explode out all of our category `start_urls` into subcategories
-    # with open(settings.start_file, "r") as f:
-    #     for line in f:
-    #         line = line.strip()
-    #         if not line or line.startswith("#"):
-    #             continue  # skip blank and commented out lines
-
-    #         #page, html = make_request(line)
-    #         count = 0
-
-    #         # look for subcategory links on this page
-    #         #subcategories = page.findAll("div", "bxc-grid__image")  # downward arrow graphics
-    #         #subcategories = page.findAll("li", "acs-ln-special-link") # Only "Shop all" links
-    #         #sidebar = page.find("div", "browseBox")
-    #         #if sidebar:
-    #         #    subcategories.extend(sidebar.findAll("li"))  # left sidebar
-    #         enqueue_url(line)
-    #         #for subcategory in subcategories:
-            #    link = subcategory.find("a")
-            #    if not link:
-            #        continue
-            #    link = link["href"]
-            #    count += 1
-            #    enqueue_url(link)
-            #    print("Enqueued {}".format(link))
-
-            #log("Found {} subcategories on {}".format(count, line))
 
 
 def fetch_info():
@@ -114,6 +87,12 @@ if __name__ == '__main__':
         begin_crawl()  # put a bunch of subcategory URLs into the queue
 
     log("Beginning crawl at {}".format(crawl_time))
-    [pile.spawn(fetch_info) for _ in range(settings.max_threads)]
-    pool.waitall()
+    while (smem("products")):
+        try:
+            [pile.spawn(fetch_info) for _ in range(settings.max_threads)]
+            pool.waitall()
+        except:
+            # print smem()
+            continue
+
     # fetch_info()

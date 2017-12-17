@@ -111,6 +111,13 @@ def enqueue_url(u):
 def dequeue_url():
     return redis.spop("listing_url_queue")
 
+def smem(stack_name):
+    # print (redis.smembers(stack_name))
+    if len(redis.smembers(stack_name)) > 0:
+        return True
+    else:
+        return False
+
 
 def page_save(html):
     f = open("thing.html", 'w')
