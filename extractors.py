@@ -54,12 +54,12 @@ def get_category(page):
         categories = page.findAll("a", "a-link-normal a-color-tertiary")
     except AttributeError:
         return "<missing catgory>"
-    result = str()
+    result = str().encode("utf-8")
     if categories:
         # print categories[0]
         y = 0    
         for x in categories:
-            result += htmlparser.unescape(x.text.encode("utf-8"))
+            result += x.text.encode("utf-8")
             if y < len(categories)-1:
                 result = result + " > "
             y +=1
@@ -72,13 +72,13 @@ def get_bullets(page):
         bullets = page.findAll("span", "a-list-item")
     except AttributeError:
         return "<no bullets found>"
-    res = str()
+    res = str().encode("utf-8")
     if bullets:
         for x in bullets:
-            res = res + " " + htmlparser.unescape(x.text.encode("utf-8"))
+            res = res + " " + x.text.encode("utf8")
         # print("this is result of bulletes: {}".format(res).encode("utf-8"))
         try:
-            return res.encode("utf-8")
+            return res.encode("utf8")
         except UnicodeDecodeError:
             return res
     return "<no bullets found>"
@@ -93,13 +93,10 @@ def get_product_description(page):
     # print page
     try:
         product_des = page.findAll("p")
-        res = str()
+        res = str().encode('utf-8')
         if page:
             for p in product_des:
-                try:
-                    res += " " + htmlparser.unescape(p.text.encode("utf-8"))
-                except UnicodeDecodeError:
-                    res += " ERROR "
+                res += " " + p.text.encode("utf-8")
             # print ("product description: {}".format(res))
         try:
             return res.encode("utf-8")
@@ -119,13 +116,13 @@ def get_specs(page):
     except AttributeError:
         return specs
     # specs = {"dimensions", "weight", "ASIN", "MRA_min", "MRA_max", "batteries", "maufacturer", "department", "review"}
-    print specs
+    # print specs
     for rows in table_r:
         key = rows.find("th").text
         if key in specs:
             specs[key] = rows.find("td").text
-        else:
-            print "supperflous information found {}".format(key)
+        # else:
+            # print "supperflous information found {}".format(key)
     print specs
     return specs
 

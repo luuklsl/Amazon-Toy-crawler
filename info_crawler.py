@@ -12,7 +12,7 @@ from extractors import * # get_title, get_url, get_price, get_primary_img, price
 crawl_time = datetime.now()
 
 
-settings.max_threads = 1 #override the setting locally for now
+# settings.max_threads = 1 #override the setting locally for now
 
 save_html = False
 
@@ -52,7 +52,7 @@ def fetch_info():
         return
     
 
-    page, html = make_request(url)
+    page, html = make_request(url, identifier=x)
     if page is None: #if we dont find the page, we can't do anything with it
         print "Page does not exists?"
         return
@@ -62,6 +62,7 @@ def fetch_info():
         print ("saving")
         page_save(html)
 
+    print "id is: {}".format(x)
     print url
     product_price = price_on_page(page)
     category = get_category(page.find("ul", "a-unordered-list a-horizontal a-size-small"))
@@ -91,8 +92,12 @@ if __name__ == '__main__':
         try:
             [pile.spawn(fetch_info) for _ in range(settings.max_threads)]
             pool.waitall()
-        except:
+        except MemoryError:
             # print smem()
+            break
+        except KeyboardInterrupt:
+            break
+        except:
             continue
 
     # fetch_info()

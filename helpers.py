@@ -18,7 +18,7 @@ num_requests = 0
 redis = redis.StrictRedis(host=settings.redis_host, port=settings.redis_port, db=settings.redis_db)
 
 
-def make_request(url, return_soup=True):
+def make_request(url, return_soup=True, identifier=0):
     # global request building and response handling
 
     # url = format_url(url)
@@ -42,6 +42,7 @@ def make_request(url, return_soup=True):
     if r.status_code != 200:
         os.system('say "Got non-200 Response"')
         log("WARNING: Got a {} status code for URL: {}".format(r.status_code, url))
+        log("404 identifier: ".format(identifier))
         return None
 
     if return_soup:

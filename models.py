@@ -33,32 +33,41 @@ def insert_extra(price, category, bullets, manfacturer_info, product_info, specs
     string = specs["Manufacturer recommended age"]
     try:
         st = string.split("-")
-        print st
+        # print st
         # print len(st)
         if len(st)==1: #the target is specified as `x months/years and up`
             if (st[0].find("years")>=0 ):
                 z = st[0].find("years")
             elif (st[0].find("months")>=0):
                 z = st[0].find("months") 
+            elif (st[0].find("month")>= 0):
+                z = st[0].find("month")
             st[0] = st[0][:z]
             
 
 
         elif (st[1].find("years")== -1): #if years is not found
-            x = st[1].find("months")    #find whereever month is hiding
+            if (st[1].find("months")>=0):
+                x = st[1].find("months")    #find whereever month is hiding
+            elif (st[1].find("month")>=0):
+                x = st[1].find("month")
             st[1] = str(float(st[1][:x])/12) #devide by 12, add years
             st[0] = str(float(st[0][:x])/12)
+        
+
         else:
             if (st[0].find("months")>=0):   #if only the first one is written in months
                 z = st[0].find("months")
                 st[0] = str(float(st[0][:z])/12) #do same as above
             x = st[1].find("years") #for second one, cut off
+
+
         if len(st)>1:  #if we had something to split on before
-            try:
-                st[1] =st[1][:x]
-            except UnboundLocalError:
-                print st
-                raise ValueError()
+            # try:
+            st[1] =st[1][:x]
+            # except UnboundLocalError:
+                # print st
+                # break
             # print st[1]
             st[1] = st[1]+" years"
             st[0] = st[0]+" years"
@@ -115,7 +124,9 @@ def retrieve():
     cur.execute("""SELECT * 
 FROM products2
 WHERE price IS NULL
-LIMIT {}""".format(settings.max_per_set))
+LIMIT {}""".format(settings.max_per_set)
+)
+    # cur.execute()
     return cur.fetchall()
 
 
